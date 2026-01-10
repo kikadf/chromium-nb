@@ -3,9 +3,10 @@
 Sources to build chromium on NetBSD:
 
 1. HID support (services/device/hid): based on OpenBSD’s *fido* and the FreeBSD backends, and uses [libudev-bsd](https://github.com/kikadf/libudev-bsd).
+2. Audioio support (media/audio/audioio): port from sndio backend of Robert Nagy, used works of Nia Alarie on cubeb and RetroArch.
 
 ## Usage
 
 1. Extract the files into Chromium's source tree
 2. For HID support add `use_udev=true` to your `GN_ARGS`
-
+3. For audioio support add `use_audioio=true` to `GN_ARGS`
