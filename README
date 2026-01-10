@@ -6,6 +6,7 @@ Sources to build chromium on NetBSD:
 2. Audioio support (media/audio/audioio): port from sndio backend of Robert Nagy, used works of Nia Alarie on cubeb and RetroArch.
 3. base/system: SysInfo functions.
 4. base/process: Process{Iterator,Metrics} functions.
+5. sandbox/policy/netbsd: sandboxing.
 
 ## Usage
 
