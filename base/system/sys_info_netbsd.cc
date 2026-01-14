@@ -25,7 +25,7 @@ ByteCount AmountOfMemory(int pages_name) {
   if (pages < 0 || page_size < 0) {
     return ByteCount(0);
   }
-  return ByteCount(page_size) * page;
+  return ByteCount(page_size) * pages;
 }
 
 }  // namespace
