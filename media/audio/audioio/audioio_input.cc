@@ -3,6 +3,7 @@
 
 #include "base/logging.h"
 #include "media/base/audio_sample_types.h"
+#include "media/base/audio_bus.h"
 #include "media/base/audio_timestamp_helper.h"
 #include "media/audio/audioio/audio_manager_audioio.h"
 #include "media/audio/audio_manager.h"
