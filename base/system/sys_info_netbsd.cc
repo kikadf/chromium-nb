@@ -19,13 +19,13 @@ namespace base {
 
 namespace {
 
-ByteCount AmountOfMemory(int pages_name) {
+ByteSize AmountOfMemory(int pages_name) {
   long pages = sysconf(pages_name);
   long page_size = sysconf(_SC_PAGESIZE);
   if (pages < 0 || page_size < 0) {
-    return ByteCount(0);
+    return ByteSize(0);
   }
-  return ByteCount(page_size) * pages;
+  return ByteSize(checked_cast<unsigned long>(page_size)) * pages;
 }
 
 }  // namespace
@@ -55,12 +55,12 @@ std::string SysInfo::CPUModelName() {
 }
 
 // static
-ByteCount SysInfo::AmountOfPhysicalMemoryImpl() {
+ByteSize SysInfo::AmountOfPhysicalMemoryImpl() {
   return AmountOfMemory(_SC_PHYS_PAGES);
 }
 
 // static
-ByteCount SysInfo::AmountOfAvailablePhysicalMemoryImpl() {
+ByteSize SysInfo::AmountOfAvailablePhysicalMemoryImpl() {
   // With NetBSD-11
   //return AmountOfMemory(_SC_AVPHYS_PAGES);
   struct uvmexp_sysctl uvmexp;
@@ -68,9 +68,9 @@ ByteCount SysInfo::AmountOfAvailablePhysicalMemoryImpl() {
   int mib[] = { CTL_VM, VM_UVMEXP2 };
   if (sysctl(mib, std::size(mib), &uvmexp, &len, NULL, 0) <0) {
     NOTREACHED();
-    return ByteCount();
+    return ByteSize(0);
   }
-  return ByteCount(uvmexp.free);
+  return ByteSize(uvmexp.free);
 }
 
 // static
