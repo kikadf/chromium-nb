@@ -13,6 +13,7 @@
 
 #include "base/notreached.h"
 #include "base/posix/sysctl.h"
+#include "base/numerics/safe_conversions.h"
 #include "base/strings/string_util.h"
 
 namespace base {
@@ -55,7 +56,7 @@ std::string SysInfo::CPUModelName() {
 }
 
 // static
-ByteSize SysInfo::AmountOfPhysicalMemoryImpl() {
+ByteSize SysInfo::AmountOfTotalPhysicalMemoryImpl() {
   return AmountOfMemory(_SC_PHYS_PAGES);
 }
 
@@ -70,7 +71,7 @@ ByteSize SysInfo::AmountOfAvailablePhysicalMemoryImpl() {
     NOTREACHED();
     return ByteSize(0);
   }
-  return ByteSize(uvmexp.free);
+  return ByteSize(checked_cast<unsigned>(uvmexp.free));
 }
 
 // static
