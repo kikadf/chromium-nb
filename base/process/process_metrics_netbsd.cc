@@ -71,7 +71,7 @@ ProcessMetrics::GetCumulativeCPUUsage() {
   }
 
   tv.tv_sec = info.p_rtime_sec;
-  tv.tv_usec = info.p_rtime_usec;
+  tv.tv_usec = static_cast<suseconds_t>(info.p_rtime_usec);
 
   return base::ok(Microseconds(TimeValToMicroseconds(tv)));
 }
@@ -83,23 +83,21 @@ std::unique_ptr<ProcessMetrics> ProcessMetrics::CreateProcessMetrics(
 }
 
 size_t GetSystemCommitCharge() {
-  int mib[] = { CTL_VM, VM_METER };
-  size_t pagesize;
-  struct vmtotal vmtotal;
-  unsigned long mem_total, mem_free, mem_inactive;
-  size_t len = sizeof(vmtotal);
+  int mib[] = { CTL_VM, VM_UVMEXP2 };
+  struct uvmexp_sysctl uvm;
+  size_t len = sizeof(uvm);
 
-  if (sysctl(mib, std::size(mib), &vmtotal, &len, NULL, 0) < 0) {
+  if (sysctl(mib, std::size(mib), &uvm, &len, NULL, 0) < 0) {
     return 0;
   }
 
-  mem_total = vmtotal.t_vm;
-  mem_free = vmtotal.t_free;
-  mem_inactive = vmtotal.t_vm - vmtotal.t_avm;
+  const int64_t used_pages =
+      std::max<int64_t>(0, uvm.npages - uvm.free - uvm.inactive);
 
-  pagesize = checked_cast<size_t>(getpagesize());
+  const int64_t used_bytes =
+      used_pages * uvm.pagesize;
 
-  return mem_total - (mem_free * pagesize) - (mem_inactive * pagesize);
+  return static_cast<size_t>(used_bytes);
 }
 
 int ProcessMetrics::GetOpenFdCount() const {
