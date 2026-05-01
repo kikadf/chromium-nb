@@ -94,10 +94,10 @@ size_t GetSystemCommitCharge() {
   const int64_t used_pages =
       std::max<int64_t>(0, uvm.npages - uvm.free - uvm.inactive);
 
-  const int64_t used_bytes =
-      used_pages * uvm.pagesize;
+  const int64_t used_kbytes =
+      used_pages * uvm.pagesize / 1024;
 
-  return static_cast<size_t>(used_bytes);
+  return static_cast<size_t>(used_kbytes);
 }
 
 int ProcessMetrics::GetOpenFdCount() const {
