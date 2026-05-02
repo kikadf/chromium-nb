@@ -23,10 +23,11 @@ namespace {
 ByteSize AmountOfMemory(int pages_name) {
   long pages = sysconf(pages_name);
   long page_size = sysconf(_SC_PAGESIZE);
-  if (pages < 0 || page_size < 0) {
+  if (pages <= 0 || page_size <= 0) {
     return ByteSize(0);
   }
-  return ByteSize(checked_cast<unsigned long>(page_size)) * pages;
+  return ByteSize(checked_cast<uint64_t>(pages)) *
+         checked_cast<uint64_t>(page_size);
 }
 
 }  // namespace
@@ -38,8 +39,9 @@ int SysInfo::NumberOfProcessors() {
   size_t size = sizeof(ncpu);
   if (sysctl(mib, std::size(mib), &ncpu, &size, NULL, 0) < 0) {
     NOTREACHED();
+    return 1; 
   }
-  return ncpu;
+  return ncpu > 0 ? ncpu : 1;
 }
 
 // static
@@ -62,8 +64,9 @@ ByteSize SysInfo::AmountOfTotalPhysicalMemoryImpl() {
 
 // static
 ByteSize SysInfo::AmountOfAvailablePhysicalMemoryImpl() {
-  // With NetBSD-11
-  //return AmountOfMemory(_SC_AVPHYS_PAGES);
+#if defined(_SC_AVPHYS_PAGES)
+  return AmountOfMemory(_SC_AVPHYS_PAGES);
+#else
   struct uvmexp_sysctl uvmexp;
   size_t len = sizeof(uvmexp);
   int mib[] = { CTL_VM, VM_UVMEXP2 };
@@ -71,18 +74,21 @@ ByteSize SysInfo::AmountOfAvailablePhysicalMemoryImpl() {
     NOTREACHED();
     return ByteSize(0);
   }
-  return ByteSize(checked_cast<unsigned>(uvmexp.free));
+  return ByteSize(checked_cast<uint64_t>(uvmexp.free)) *
+       checked_cast<uint64_t>(uvmexp.pagesize);
+#endif
 }
 
 // static
 uint64_t SysInfo::MaxSharedMemorySize() {
   int mib[] = {CTL_KERN, KERN_SYSVIPC, KERN_SYSVIPC_SHMMAX};
-  size_t limit;
+  uint64_t limit;
   size_t size = sizeof(limit);
   if (sysctl(mib, std::size(mib), &limit, &size, NULL, 0) < 0) {
     NOTREACHED();
+    return 0; 
   }
-  return static_cast<uint64_t>(limit);
+  return limit;
 }
 
 // static
