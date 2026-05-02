@@ -10,6 +10,7 @@
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
+#include <uvm/uvm_extern.h> // struct uvmexp_sysctl
 
 #include "base/files/dir_reader_posix.h" // DirReaderPosix
 #include "base/process/internal_linux.h" // GetProcPidDir()
