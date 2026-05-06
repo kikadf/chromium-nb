@@ -40,7 +40,8 @@ ProcessIterator::ProcessIterator(const ProcessFilter* filter)
       num_of_kinfo_proc += 16;
       kinfo_procs_.resize(num_of_kinfo_proc);
       len = num_of_kinfo_proc * sizeof(struct kinfo_proc2);
-      if (sysctl(mib, std::size(mib), &kinfo_procs_[0], &len, NULL, 0) < 0) {
+      mib[5] = static_cast<int>(num_of_kinfo_proc);
+      if (sysctl(mib, std::size(mib), kinfo_procs_.data(), &len, NULL, 0) < 0) {
         // If we get a mem error, it just means we need a bigger buffer, so
         // loop around again.  Anything else is a real error and give up.
         if (errno != ENOMEM) {
