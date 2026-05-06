@@ -20,30 +20,20 @@
 namespace base {
 
 ProcessId GetParentProcessId(ProcessHandle process) {
-  struct kinfo_proc2 *info;
-  size_t length;
-  pid_t ppid;
+  struct kinfo_proc2 info;
+  size_t length = sizeof(struct kinfo_proc2);
   int mib[] = { CTL_KERN, KERN_PROC2, KERN_PROC_PID, process,
                 sizeof(struct kinfo_proc2), 1 };
 
-  if (sysctl(mib, std::size(mib), NULL, &length, NULL, 0) < 0) {
+  if (sysctl(mib, std::size(mib), &info, &length, NULL, 0) < 0) {
     return -1;
   }
 
-  info = (struct kinfo_proc2 *)malloc(length);
-
-  mib[5] = static_cast<int>((length / sizeof(struct kinfo_proc2)));
-
-  if (sysctl(mib, std::size(mib), info, &length, NULL, 0) < 0) {
-    ppid = -1;
-    goto out;
+  if (length != sizeof(info)) {
+    return -1;
   }
 
-  ppid = info->p_ppid;
-
-out:
-  free(info);
-  return ppid;
+  return info.p_ppid;
 }
 
 FilePath GetProcessExecutablePath(ProcessHandle process) {
