@@ -76,7 +76,7 @@ bool ProcessIterator::CheckForNextProcess() {
       continue;
     }
 
-    int mib[] = { CTL_KERN, KERN_PROC_ARGS, kinfo.p_pid };
+    int mib[] = { CTL_KERN, KERN_PROC_ARGS, kinfo.p_pid, KERN_PROC_ARGV };
 
     // Find out what size buffer we need.
     size_t data_len = 0;
@@ -84,12 +84,16 @@ bool ProcessIterator::CheckForNextProcess() {
       DVPLOG(1) << "failed to figure out the buffer size for a commandline";
       continue;
     }
+    if (data_len == 0) {
+      continue;
+    }
 
     data.resize(data_len);
-    if (sysctl(mib, std::size(mib), &data[0], &data_len, NULL, 0) < 0) {
+    if (sysctl(mib, std::size(mib), data.data(), &data_len, NULL, 0) < 0) {
       DVPLOG(1) << "failed to fetch a commandline";
       continue;
     }
+    data.resize(data_len);
 
     // |data| contains all the command line parameters of the process, separated
     // by blocks of one or more null characters. We tokenize |data| into a
