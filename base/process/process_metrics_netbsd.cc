@@ -7,13 +7,12 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
 #include <uvm/uvm_extern.h> // struct uvmexp_sysctl
 
-#include "base/files/dir_reader_posix.h" // DirReaderPosix
-#include "base/process/internal_linux.h" // GetProcPidDir()
 #include "base/memory/ptr_util.h"
 #include "base/types/expected.h"
 #include "base/values.h"
@@ -101,29 +100,32 @@ size_t GetSystemCommitCharge() {
   return static_cast<size_t>(used_kbytes);
 }
 
-int ProcessMetrics::GetOpenFdCount() const {
-  // Use /proc/<pid>/fd to count the number of entries there.
-  FilePath fd_path = internal::GetProcPidDir(process_).Append("fd");
+int ProcessMetrics::GetOpenFdSoftLimit() const {
+  struct rlimit rl;
 
-  DirReaderPosix dir_reader(fd_path.value().c_str());
-  if (!dir_reader.IsValid()) {
+  if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
     return -1;
   }
 
-  int total_count = 0;
-  for (; dir_reader.Next();) {
-    const char* name = dir_reader.name();
-    if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
-      ++total_count;
+  return (rl.rlim_cur > INT_MAX) ? INT_MAX : (int)rl.rlim_cur;
+}
+
+int ProcessMetrics::GetOpenFdCount() const {
+  int count = 0;
+  int max_fd = GetOpenFdSoftLimit();
+  if (max_fd == -1) {
+    return -1;
+  } else if (max_fd > 10000) {
+    max_fd = 10000;
+  }
+
+  for (int i = 0; i < max_fd; ++i) {
+    if (fcntl(i, F_GETFD) >= 0 || errno != EBADF) {
+      count++;
     }
   }
 
-  return total_count;
-}
-
-int ProcessMetrics::GetOpenFdSoftLimit() const {
-  return getdtablesize();
-//  return GetMaxFds();
+  return count;
 }
 
 bool ProcessMetrics::GetPageFaultCounts(PageFaultCounts* counts) const {
