@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/resource.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
