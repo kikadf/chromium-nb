@@ -20,7 +20,7 @@ namespace base {
 ProcessIterator::ProcessIterator(const ProcessFilter* filter)
     : filter_(filter) {
   int mib[] = { CTL_KERN, KERN_PROC2, KERN_PROC_UID, static_cast<int>(getuid()),
-                sizeof(struct kinfo_proc2), 1 };
+                sizeof(struct kinfo_proc2), 0 };
 
   bool done = false;
   int try_num = 1;
