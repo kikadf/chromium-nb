@@ -34,10 +34,10 @@ class MEDIA_EXPORT AudioManagerAudioIO : public AudioManagerBase {
   bool HasAudioInputDevices() override;
   // Appends a list of available input devices to |device_names|,
   // which must initially be empty.
-  void GetAudioInputDeviceNames(AudioDeviceNames* device_names) override;
+  bool GetAudioInputDeviceNames(AudioDeviceNames* device_names) override;
   // Appends a list of available output devices to |device_names|,
   // which must initially be empty.
-  void GetAudioOutputDeviceNames(AudioDeviceNames* device_names) override;
+  bool GetAudioOutputDeviceNames(AudioDeviceNames* device_names) override;
   // Returns the input hardware audio parameters of the specific device
   // for opening input streams. Each AudioManager needs to implement their own
   // version of this interface.

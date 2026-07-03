@@ -41,16 +41,18 @@ bool AudioManagerAudioIO::HasAudioInputDevices() {
   return !devices.empty();
 }
 
-void AudioManagerAudioIO::GetAudioInputDeviceNames(
+bool AudioManagerAudioIO::GetAudioInputDeviceNames(
     AudioDeviceNames* device_names) {
   GetAudioDevices(INPUT);
   *device_names = *input_devices;
+  return !input_devices->empty();
 }
 
-void AudioManagerAudioIO::GetAudioOutputDeviceNames(
+bool AudioManagerAudioIO::GetAudioOutputDeviceNames(
     AudioDeviceNames* device_names) {
   GetAudioDevices(OUTPUT);
   *device_names = *output_devices;
+  return !output_devices->empty();
 }
 
 void AudioManagerAudioIO::GetAudioDevices(int type) {
