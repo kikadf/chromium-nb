@@ -40,16 +40,7 @@ class HidServiceNetBSD : public HidService {
 // opening a device. Because this operation crosses multiple threads these
 // functions are static and the necessary parameters are passed as a single
 // struct.
-#if BUILDFLAG(IS_CHROMEOS_ASH)
-  static void OnPathOpenComplete(std::unique_ptr<ConnectParams> params,
-                                 base::ScopedFD fd);
-  static void OnPathOpenError(const std::string& device_path,
-                              ConnectCallback callback,
-                              const std::string& error_name,
-                              const std::string& error_message);
-#else
   static void OpenOnBlockingThread(std::unique_ptr<ConnectParams> params);
-#endif
   static void FinishOpen(std::unique_ptr<ConnectParams> params);
 
   const scoped_refptr<base::SequencedTaskRunner> blocking_task_runner_;
