@@ -99,7 +99,7 @@ void SandboxLinux::PreinitializeSandbox(sandbox::mojom::Sandbox sandbox_type) {
   const std::string process_type =
       command_line->GetSwitchValueASCII(switches::kProcessType);
 
-  base::SysInfo::AmountOfPhysicalMemory();
+  base::SysInfo::AmountOfTotalPhysicalMemory();
   base::SysInfo::NumberOfProcessors();
   base::SysInfo::CPUModelName();
 
