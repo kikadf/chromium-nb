@@ -58,7 +58,9 @@
 
 #include "third_party/boringssl/src/include/openssl/crypto.h"
 
-#include "ui/gfx/font_util.h"
+#include <fontconfig/fontconfig.h>
+#include "ui/gfx/linux/fontconfig_util.h"
+#include "skia/ext/font_utils.h"
 
 namespace sandbox {
 namespace policy {
@@ -132,8 +134,12 @@ void SandboxLinux::PreinitializeSandbox(sandbox::mojom::Sandbox sandbox_type) {
       break;
     }
     case sandbox::mojom::Sandbox::kRenderer:
-      gfx::InitializeFonts();
+    {
+      FcConfig* config = gfx::GetGlobalFontConfig();
+      DCHECK(config);
+      skia::InitializeFontRendering();
       break;
+    }
     default:
       break;
   }
