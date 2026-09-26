@@ -1,6 +1,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+#include "base/containers/span.h"
 #include "base/logging.h"
 #include "base/time/time.h"
 #include "base/time/default_tick_clock.h"
@@ -224,13 +225,17 @@ void AudioIOAudioOutputStream::ThreadLoop(void) {
     // Get data to play
     const base::TimeDelta delay = AudioTimestampHelper::FramesToTime(hw_delay, params.sample_rate());
     count = source->OnMoreData(delay, base::TimeTicks::Now(), {}, audio_bus.get());
-    audio_bus->ToInterleaved<SignedInt16SampleTypeTraits>(count, reinterpret_cast<int16_t*>(buffer));
     if (count == 0) {
       // We have to submit something to the device
       count = audio_bus->frames();
       memset(buffer, 0, count * framesize);
       LOG(WARNING) << "[AUDIOIO] Output:ThreadLoop(): No data to play, running empty cycle.";
-    }
+    } else{
+      audio_bus->ToInterleavedBytesPartial<SignedInt16SampleTypeTraits>(
+        /*read_offset=*/0u,
+        base::span(reinterpret_cast<uint8_t*>(buffer),
+		      static_cast<size_t>(count * params.GetBytesPerFrame(kSampleFormat))));
+    } 
 
     // Submit data to the device
     move = 0;

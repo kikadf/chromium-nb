@@ -255,7 +255,9 @@ void AudioIOAudioInputStream::ThreadLoop(void) {
     const base::TimeDelta delay = AudioTimestampHelper::FramesToTime(hw_delay, params.sample_rate());
 
     // push into bus
-    audio_bus->FromInterleaved<SignedInt16SampleTypeTraits>(reinterpret_cast<int16_t*>(buffer), nframes);
+    audio_bus->FromInterleaved<SignedInt16SampleTypeTraits>(
+      base::span<const int16_t>(reinterpret_cast<int16_t*>(buffer),
+                    static_cast<size_t>(nframes * params.channels())));
 
     // invoke callback
     callback->OnData(audio_bus.get(), base::TimeTicks::Now() - delay, normalized_volume, {});
