@@ -233,9 +233,8 @@ void AudioIOAudioOutputStream::ThreadLoop(void) {
     } else{
       audio_bus->ToInterleavedBytesPartial<SignedInt16SampleTypeTraits>(
         /*read_offset=*/0u,
-        base::span(reinterpret_cast<uint8_t*>(buffer),
-		      static_cast<size_t>(count * params.GetBytesPerFrame(kSampleFormat))));
-    } 
+        base::span(reinterpret_cast<uint8_t*>(buffer), static_cast<size_t>(count * framesize)));
+    }
 
     // Submit data to the device
     move = 0;
